@@ -1,0 +1,26 @@
+{
+  "name": "fretes41log",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000a\u0000p\u0000p\u00004\u00001\u0000l\u0000o\u0000g\u0000_\u0000\r\u0000 \u0000",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RaufAlencar/app41log_.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RaufAlencar/app41log_/issues"
+  },
+  "homepage": "https://github.com/RaufAlencar/app41log_#readme",
+  "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">fretes41log</string>
+    <string name="title_activity_main">fretes41log</string>
+    <string name="package_name">com.raufalencar.frerte</string>
+    <string name="custom_url_scheme">com.raufalencar.frerte</string>
+</resources>
