@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>41Log - Área do Freteiro</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="freighter.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMap" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 10H25L20 30H5L10 10Z" fill="#1a73e8"/>
+                    <text x="30" y="27" fill="#fff" font-size="22" font-weight="bold">41Log</text>
+                </svg>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#availableFreightsModal">Fretes Disponíveis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#historyModal">Histórico</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">Perfil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container freighter-dashboard mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Frete Atual</h4>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="availabilitySwitch" checked>
+                            <label class="form-check-label" for="availabilitySwitch">Disponível para Fretes</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="currentFreightInfo">
+                            <div class="alert alert-info mb-3">
+                                Você possui um frete em andamento!
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Detalhes do Frete</h5>
+                                    <p><strong>Cliente:</strong> Carlos Oliveira</p>
+                                    <p><strong>Origem:</strong> R. Mateus Leme, 123</p>
+                                    <p><strong>Destino:</strong> R. João Bettega, 456</p>
+                                    <p><strong>Tipo de Carga:</strong> Móveis</p>
+                                    <p><strong>Descrição:</strong> 1 sofá, 1 mesa e 4 cadeiras</p>
+                                    <p><strong>Valor:</strong> R$ 80,00</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Status do Frete</h5>
+                                    <div class="progress-tracker">
+                                        <div class="progress-step active">
+                                            <div class="step-icon"><i class="fas fa-check"></i></div>
+                                            <div class="step-text">Aceito</div>
+                                        </div>
+                                        <div class="progress-step active">
+                                            <div class="step-icon"><i class="fas fa-check"></i></div>
+                                            <div class="step-text">A caminho da coleta</div>
+                                        </div>
+                                        <div class="progress-step active">
+                                            <div class="step-icon"><i class="fas fa-truck"></i></div>
+                                            <div class="step-text">Carregando</div>
+                                        </div>
+                                        <div class="progress-step">
+                                            <div class="step-icon"><i class="fas fa-circle"></i></div>
+                                            <div class="step-text">Em trânsito</div>
+                                        </div>
+                                        <div class="progress-step">
+                                            <div class="step-icon"><i class="fas fa-circle"></i></div>
+                                            <div class="step-text">Entregue</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button class="btn btn-primary me-2" id="updateStatusBtn">Atualizar Status</button>
+                                        <button class="btn btn-outline-secondary" id="contactClientBtn">Contatar Cliente</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="noCurrentFreight" class="text-center py-5 d-none">
+                            <i class="fas fa-truck-loading fa-5x mb-3 text-muted"></i>
+                            <h5>Sem fretes no momento</h5>
+                            <p>Veja os fretes disponíveis e comece a ganhar dinheiro!</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availableFreightsModal">Ver Fretes Disponíveis</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Mapa</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="map" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">Seus Ganhos</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="earning-summary">
+                            <div class="earning-item">
+                                <div class="earning-label">Hoje</div>
+                                <div class="earning-value">R$ 80,00</div>
+                            </div>
+                            <div class="earning-item">
+                                <div class="earning-label">Esta Semana</div>
+                                <div class="earning-value">R$ 240,00</div>
+                            </div>
+                            <div class="earning-item">
+                                <div class="earning-label">Este Mês</div>
+                                <div class="earning-value">R$ 1.250,00</div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#earningsModal">Ver Detalhes</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">Sua Avaliação</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="rating-summary text-center">
+                            <div class="rating-value">4.8</div>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <div class="rating-count">Baseado em 47 avaliações</div>
+                        </div>
+                        <hr>
+                        <h5>Comentários Recentes</h5>
+                        <div class="recent-reviews">
+                            <div class="review-item">
+                                <div class="review-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="review-text">
+                                    "Excelente serviço, muito pontual e cuidadoso com meus móveis."
+                                </div>
+                                <div class="review-author">- Ana L.</div>
+                            </div>
+                            <div class="review-item">
+                                <div class="review-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <div class="review-text">
+                                    "Bom serviço, recomendo."
+                                </div>
+                                <div class="review-author">- Pedro M.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="availableFreightsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Fretes Disponíveis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="available-freights">
+                        <div class="freight-item">
+                            <div class="freight-header">
+                                <div class="freight-info">
+                                    <h5>Mudança Residencial</h5>
+                                    <p>Distância: 9.2 km • R$ 80,00</p>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Aceitar</button>
+                            </div>
+                            <div class="freight-details">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Origem:</strong> R. José Loureiro, 123</p>
+                                        <p><strong>Destino:</strong> R. Izaac Ferreira da Cruz, 456</p>
+                                        <p><strong>Tipo de Carga:</strong> Móveis</p>
+                                        <p><strong>Horário:</strong> Hoje, 16:30</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Descrição:</strong> 2 sofás, 1 geladeira, 1 cama</p>
+                                        <p><strong>Peso Aproximado:</strong> 250 kg</p>
+                                        <p><strong>Cliente:</strong> Maria S. (4.7 ★)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="freight-item">
+                            <div class="freight-header">
+                                <div class="freight-info">
+                                    <h5>Entrega de Eletrônicos</h5>
+                                    <p>Distância: 6.4 km • R$ 70,00</p>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Aceitar</button>
+                            </div>
+                            <div class="freight-details">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Origem:</strong> Shopping Palladium</p>
+                                        <p><strong>Destino:</strong> R. Desembargador Motta, 987</p>
+                                        <p><strong>Tipo de Carga:</strong> Eletrônicos</p>
+                                        <p><strong>Horário:</strong> Hoje, 18:00</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Descrição:</strong> 1 TV 55", 1 som</p>
+                                        <p><strong>Peso Aproximado:</strong> 40 kg</p>
+                                        <p><strong>Cliente:</strong> Paulo R. (4.9 ★)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Histórico de Fretes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Cliente</th>
+                                    <th>Origem - Destino</th>
+                                    <th>Valor</th>
+                                    <th>Avaliação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>10/06/2023</td>
+                                    <td>Carlos O.</td>
+                                    <td>R. Mateus Leme → R. João Bettega</td>
+                                    <td>R$ 80,00</td>
+                                    <td>
+                                        <div class="rating">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/06/2023</td>
+                                    <td>Ana L.</td>
+                                    <td>Av. Cândido de Abreu → R. Padre Anchieta</td>
+                                    <td>R$ 70,00</td>
+                                    <td>
+                                        <div class="rating">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>05/06/2023</td>
+                                    <td>Pedro M.</td>
+                                    <td>Rua Chile → Av. Manoel Ribas</td>
+                                    <td>R$ 90,00</td>
+                                    <td>
+                                        <div class="rating">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="earningsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes de Ganhos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="earningsTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#dailyEarnings">Diário</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#weeklyEarnings">Semanal</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#monthlyEarnings">Mensal</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="dailyEarnings">
+                            <div class="earning-chart">
+                                <!-- Chart would be rendered here -->
+                                <div class="chart-placeholder" style="height: 200px; background-color: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    Gráfico de Ganhos Diários
+                                </div>
+                            </div>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Horário</th>
+                                            <th>Cliente</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>14:30</td>
+                                            <td>Carlos O.</td>
+                                            <td>R$ 80,00</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2" class="text-end"><strong>Total</strong></td>
+                                            <td><strong>R$ 80,00</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="weeklyEarnings">
+                            <div class="earning-chart">
+                                <!-- Chart would be rendered here -->
+                                <div class="chart-placeholder" style="height: 200px; background-color: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    Gráfico de Ganhos Semanais
+                                </div>
+                            </div>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Dia</th>
+                                            <th>Fretes</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Seg (10/06)</td>
+                                            <td>1</td>
+                                            <td>R$ 80,00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sáb (08/06)</td>
+                                            <td>2</td>
+                                            <td>R$ 160,00</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2" class="text-end"><strong>Total</strong></td>
+                                            <td><strong>R$ 240,00</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="monthlyEarnings">
+                            <div class="earning-chart">
+                                <!-- Chart would be rendered here -->
+                                <div class="chart-placeholder" style="height: 200px; background-color: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    Gráfico de Ganhos Mensais
+                                </div>
+                            </div>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Semana</th>
+                                            <th>Fretes</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>05/06 - 11/06</td>
+                                            <td>3</td>
+                                            <td>R$ 240,00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>29/05 - 04/06</td>
+                                            <td>5</td>
+                                            <td>R$ 410,00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>22/05 - 28/05</td>
+                                            <td>6</td>
+                                            <td>R$ 480,00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>15/05 - 21/05</td>
+                                            <td>2</td>
+                                            <td>R$ 120,00</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2" class="text-end"><strong>Total</strong></td>
+                                            <td><strong>R$ 1.250,00</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Meu Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="freighterProfileForm">
+                        <div class="mb-3">
+                            <label for="profileName" class="form-label">Nome completo</label>
+                            <input type="text" class="form-control" id="profileName" value="José Santos">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="profileEmail" value="jose.santos@example.com" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profilePhone" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="profilePhone" value="(41) 98888-8888">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileVehicle" class="form-label">Tipo de veículo</label>
+                            <select class="form-select" id="profileVehicle">
+                                <option value="van" selected>Van</option>
+                                <option value="truck_small">Caminhão pequeno</option>
+                                <option value="truck_medium">Caminhão médio</option>
+                                <option value="truck_large">Caminhão grande</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileLicense" class="form-label">Placa do veículo</label>
+                            <input type="text" class="form-control" id="profileLicense" value="ABC-1234">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profilePassword" class="form-label">Nova senha</label>
+                            <input type="password" class="form-control" id="profilePassword">
+                            <small class="form-text text-muted">Deixe em branco para manter a senha atual</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="freighter.js"></script>
+</body>
+</html>

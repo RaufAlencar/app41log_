@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>41Log - Área do Usuário</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="user.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCChmQcfJ75W7Ikt43dgZS5jGiS7RrWHt4&libraries=places&callback=initMap" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 10H25L20 30H5L10 10Z" fill="#1a73e8"/>
+                    <text x="30" y="27" fill="#fff" font-size="22" font-weight="bold">41Log</text>
+                </svg>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Solicitar Frete</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#historyModal">Histórico</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">Perfil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container user-dashboard mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4 main-card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-truck-loading me-2"></i>Solicitar Frete</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-primary mb-4">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fab fa-whatsapp fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h5 class="alert-heading mb-1">Pedir frete direto!</h5>
+                                    <p class="mb-0">Preencha o formulário abaixo com os detalhes do seu frete. Enviaremos diretamente para nossos atendentes pelo WhatsApp.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form id="freightRequestForm">
+                            <div class="mb-3">
+                                <label for="clientName" class="form-label">Seu Nome Completo</label>
+                                <input type="text" class="form-control" id="clientName" placeholder="Digite seu nome completo" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="origin" class="form-label">Endereço de Origem</label>
+                                    <div class="location-input-group">
+                                        <input type="text" class="form-control" id="origin" placeholder="Digite o endereço de origem" list="originSuggestions" required>
+                                        <i class="fas fa-map-marker-alt location-icon"></i>
+                                    </div>
+                                    <datalist id="originSuggestions"></datalist>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="destination" class="form-label">Endereço de Destino</label>
+                                    <div class="location-input-group">
+                                        <input type="text" class="form-control" id="destination" placeholder="Digite o endereço de destino" list="destinationSuggestions" required>
+                                        <i class="fas fa-map-marker-alt location-icon"></i>
+                                    </div>
+                                    <datalist id="destinationSuggestions"></datalist>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <button type="button" id="calculateRouteBtn" class="btn btn-outline-primary">
+                                        <i class="fas fa-route me-2"></i>Calcular Rota e Preço
+                                    </button>
+                                    <div id="calculatedPrice" class="mt-2"></div>
+                                </div>
+                            </div>
+                            <div id="priceBreakdown" class="price-breakdown mb-4" style="display: none;"></div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="cargoType" class="form-label">Tipo de Carga</label>
+                                    <select class="form-select" id="cargoType" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="Móveis">Móveis</option>
+                                        <option value="Eletrônicos">Eletrônicos</option>
+                                        <option value="Frágil">Frágil</option>
+                                        <option value="Caixas">Caixas</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cargoWeight" class="form-label">Peso Aproximado (kg)</label>
+                                    <input type="number" class="form-control" id="cargoWeight" placeholder="Ex: 100" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="hasStairs" class="form-label">Escadas</label>
+                                    <select class="form-select" id="hasStairs" required>
+                                        <option value="Não">Não tem escadas</option>
+                                        <option value="Sim">Tem escadas</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6" id="floorsContainer" style="display: none;">
+                                    <label for="floorCount" class="form-label">Quantos andares?</label>
+                                    <input type="number" class="form-control" id="floorCount" min="1" value="1">
+                                </div>
+                            </div>
+                            
+                            <div class="card service-options mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0 fs-6">Serviços Adicionais</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-check service-check">
+                                                <input class="form-check-input" type="checkbox" id="needsHoisting">
+                                                <label class="form-check-label" for="needsHoisting">
+                                                    <i class="fas fa-wind me-2"></i> Içamento
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check service-check">
+                                                <input class="form-check-input" type="checkbox" id="needsAssembly">
+                                                <label class="form-check-label" for="needsAssembly">
+                                                    <i class="fas fa-tools me-2"></i> Montagem
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check service-check">
+                                                <input class="form-check-input" type="checkbox" id="needsPackaging">
+                                                <label class="form-check-label" for="needsPackaging">
+                                                    <i class="fas fa-box me-2"></i> Embalagem
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cargoDescription" class="form-label">Descrição Detalhada</label>
+                                <textarea class="form-control" id="cargoDescription" rows="3" placeholder="Descreva sua carga em detalhes..."></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label for="scheduledDate" class="form-label">Data para Frete</label>
+                                <input type="datetime-local" class="form-control" id="scheduledDate" required>
+                            </div>
+                            
+                            <div class="whatsapp-quote-box mb-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="whatsapp-icon-large me-3">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Envie seu pedido de frete</h5>
+                                        <p class="mb-0">Seu pedido será enviado diretamente para nossos atendentes via WhatsApp.</p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-success btn-lg w-100" id="quoteButton">
+                                    <i class="fab fa-whatsapp me-2"></i> Obter Cotação do Frete
+                                </button>
+                            </div>
+
+                            <div class="alert alert-light border mb-0">
+                                <p class="mb-0 text-center"><i class="fas fa-info-circle me-2"></i> Os valores são calculados com base na distância e serviços adicionais. Nossa equipe analisará seu pedido e enviará um orçamento detalhado.</p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4 contact-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fab fa-whatsapp me-2 text-success"></i>Fale Conosco</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="contact-image mb-3 text-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNjAiIGZpbGw9IiMyNUQzNjYiIG9wYWNpdHk9IjAuMiIvPjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjQ1IiBmaWxsPSIjMjVEMzY2IiBvcGFjaXR5PSIwLjUiLz48Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIyNSIgZmlsbD0iIzI1RDM2NiIvPjxwYXRoIGQ9Ik01MCA2MEw1OCA2OEw3MCA1MCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=" alt="WhatsApp Support" class="img-fluid" style="max-width: 120px;">
+                        </div>
+                        <h5 class="text-center mb-3">Atendimento Rápido</h5>
+                        <p>Precisa de ajuda ou tem dúvidas sobre seu frete? Nossa equipe está pronta para atendê-lo via WhatsApp.</p>
+                        <div class="d-grid mb-4">
+                            <a href="https://wa.me/5541995500770" target="_blank" class="btn btn-success btn-lg">
+                                <i class="fab fa-whatsapp me-2"></i> Falar com a 41Log
+                            </a>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <i class="fas fa-phone-alt"></i>
+                                <span>(41) 99550-0770</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>contato@41log.com.br</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Seg-Sex: 8h às 18h</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Sáb: 8h às 13h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card price-list-card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-tags me-2"></i>Tabela de Preços</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="price-table">
+                            <div class="price-row">
+                                <div class="price-label">Até 5km</div>
+                                <div class="price-value">R$80,00</div>
+                            </div>
+                            <div class="price-row">
+                                <div class="price-label">5km até 8km</div>
+                                <div class="price-value">R$90,00</div>
+                            </div>
+                            <div class="price-row highlighted">
+                                <div class="price-label">8km até 11km</div>
+                                <div class="price-value">R$100,00</div>
+                            </div>
+                            <div class="price-row">
+                                <div class="price-label">11km até 15km</div>
+                                <div class="price-value">R$110,00</div>
+                            </div>
+                            <div class="price-row">
+                                <div class="price-label">15km até 20km</div>
+                                <div class="price-value">R$120,00</div>
+                            </div>
+                        </div>
+                        <div class="additional-services p-3">
+                            <h6 class="mb-2">Serviços Adicionais:</h6>
+                            <div class="service-item">
+                                <span class="service-name"><i class="fas fa-arrow-up me-1"></i> Escadas (por andar)</span>
+                                <span class="service-price">+R$10,00</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name"><i class="fas fa-wind me-1"></i> Içamento</span>
+                                <span class="service-price">+R$50,00</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name"><i class="fas fa-tools me-1"></i> Montagem</span>
+                                <span class="service-price">+R$35,00</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name"><i class="fas fa-box me-1"></i> Embalagem</span>
+                                <span class="service-price">+R$25,00</span>
+                            </div>
+                        </div>
+                        <div class="price-disclaimer p-3 text-center">
+                            <small><i class="fas fa-info-circle me-1"></i> Preços base. O valor final será informado via WhatsApp após análise dos detalhes do seu frete.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Histórico de Fretes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Para ver seu histórico de fretes, entre em contato conosco via WhatsApp.
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="https://wa.me/5541995500770?text=Olá! Gostaria de consultar meu histórico de fretes." target="_blank" class="btn btn-success">
+                            <i class="fab fa-whatsapp me-2"></i> Solicitar Histórico
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Meu Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userProfileForm">
+                        <div class="mb-3">
+                            <label for="profileName" class="form-label">Nome completo</label>
+                            <input type="text" class="form-control" id="profileName" value="João Silva">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="profileEmail" value="joao.silva@example.com" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profilePhone" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="profilePhone" value="(41) 99999-9999">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Atualizar via WhatsApp</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="whatsapp-floating">
+        <a href="https://wa.me/5541995500770" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="user.js"></script>
+</body>
+</html>
