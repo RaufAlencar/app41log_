@@ -1,5 +1,6 @@
-{
-  "appId": "com.raufalencar.frerte",
-  "appName": "fretes41log",
-  "webDir": "www"
+﻿{
+  "appId": "com.raulf.app41log",
+  "appName": "App41Log",
+  "webDir": "www",
+  "bundledWebRuntime": false
 }

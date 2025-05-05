@@ -1,7 +1,7 @@
 {
   "name": "fretes41log",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000a\u0000p\u0000p\u00004\u00001\u0000l\u0000o\u0000g\u0000_\u0000\r\u0000 \u0000",
+  "description": "Fretes em Curitiba e Região",
   "main": "sw.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
