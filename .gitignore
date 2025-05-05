@@ -1,2 +1,6 @@
 ﻿node_modules/
 android/
+
+secrets.properties
+local.properties
+*.jks
