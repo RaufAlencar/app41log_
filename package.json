@@ -1,12 +1,13 @@
 {
     "name": "fretes41log",
     "version": "1.0.0",
-    "description": "Fretes em Curitiba e Região",
+    "description": "Fretes em Curitiba e RegiÃƒÂ£o",
     "main": "sw.js",
     "scripts": {
-        "build": "vite build",
-        "capacitor:sync": "npx cap sync android",
-        "dev": "vite"
+        "build": "vite build --emptyOutDir",
+        "dev": "vite",
+        "android": "npx cap open android",
+        "deploy": "npm run build && npx cap sync android"
     },
     "repository": {
         "type": "git",
@@ -20,13 +21,14 @@
         "url": "https://github.com/RaufAlencar/app41log_/issues"
     },
     "homepage": "https://github.com/RaufAlencar/app41log_#readme",
-    "dependencies": {
+    "devDependencies": {
         "@capacitor/android": "^7.2.0",
         "@capacitor/cli": "^7.2.0",
-        "@capacitor/core": "^7.2.0"
-    },
-    "devDependencies": {
+        "@capacitor/core": "^7.2.0",
+        "@tailwindcss/postcss7-compat": "^2.2.17",
         "@vitejs/plugin-basic-ssl": "^2.0.0",
+        "autoprefixer": "^10.4.21",
+        "postcss": "^8.5.3",
         "vite": "^6.3.5"
     }
 }
